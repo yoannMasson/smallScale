@@ -7,6 +7,10 @@ CPP_SRCS += \
 ../src/CSR.cpp \
 ../src/Main.cpp 
 
+O_SRCS += \
+../src/CSR.o \
+../src/Main.o 
+
 OBJS += \
 ./src/CSR.o \
 ./src/Main.o 

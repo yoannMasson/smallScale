@@ -18,7 +18,9 @@ CSR::CSR(const std::string filePath) {
 
 	// Declare variables:
 	int M, N, L;
-
+	int* column;
+	int* row;
+	double* entry;
 	// Ignore headers and comments:
 	while (fin.peek() == '%') fin.ignore(2048, '\n');
 
@@ -27,19 +29,63 @@ CSR::CSR(const std::string filePath) {
 
 	(*this).M = M;
 	(*this).N = N;
-	std::cout << "size:" << L << std::endl;
+	column = new int[L];
+	row = new int[L];
+	entry = new double[L];
+
 	// Read the data
 	for (int l = 0; l < L; l++)
 	{
-		int m, n;
+		int m,n;
 		double data;
 		fin >> m >> n >> data;
-		(*this).a.push_back(data);
-		std::cout << "m[" << m << "]["<< n << "]: " << data << std::endl;
+		row[l] = m;
+		column[l] = n;
+		entry[l] = data;
+	}
+	fin.close();
 
+	std::cout << "lol";
+
+	//Parse into CSR
+	for(int currentRow = 1; currentRow <= N ; currentRow++ ){
+		for(int i = 0 ; i < L ; i++){
+			if(row[i] == currentRow ){
+				(*this).as.push_back(entry[i]);
+				(*this).ja.push_back(column[i]);
+			}
+		}
 	}
 
-	fin.close();
+	(*this).irp.push_back(0);
+	int oldValue(0);
+
+	for(int i = 1 ; i <= N ; i++){//The row we want the number of NN entry
+		int nbValuePerRow = 0;
+		for(int j = 0 ; j < N ; j++ ){//iterating through the row array to find the number of NN entry
+			if(row[j] == i){
+				nbValuePerRow++;
+			}
+		}
+		(*this).irp.push_back(oldValue+nbValuePerRow);
+		oldValue += nbValuePerRow;
+	}
+
+
+	for(int i = 0; i < (*this).as.size(); i ++){
+		std::cout << (*this).as[i] << " ";
+	}
+	std::cout << std::endl;
+
+	for(int i = 0; i < (*this).ja.size(); i ++){
+		std::cout << (*this).ja[i] << " ";
+	}
+	std::cout << std::endl;
+
+	for(int i = 0; i < (*this).irp.size(); i ++){
+		std::cout << (*this).irp[i] << " ";
+	}
+	std::cout << std::endl;
 }
 
 CSR::~CSR() {

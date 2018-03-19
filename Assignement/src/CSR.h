@@ -16,9 +16,9 @@ private:
 
 	int M;
 	int N;
-	std::vector<int> as;
+	std::vector<int> irp;
 	std::vector<int> ja;
-	std::vector<double> a;
+	std::vector<double> as;
 
 public:
 

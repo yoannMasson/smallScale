@@ -11,7 +11,7 @@ using namespace std;
 
 int main(){
 	try{
-		CSR matrix1("matricesFiles/cage4.mtx");
+		CSR matrix1("../matricesFile/testWiki.mtx");
 	}catch(std::ifstream::failure e){
 		std::cout << "Error openning/reading/closing file";
 	}

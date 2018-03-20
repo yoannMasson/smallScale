@@ -17,7 +17,7 @@ CSR::CSR(const std::string filePath) {
 	std::ifstream fin(filePath.c_str());
 
 	// Declare variables:
-	int M, N, L;
+	int M, N, L;//NUmber of row, number of column, number of NN entries
 	int* column;
 	int* row;
 	double* entry;
@@ -45,10 +45,8 @@ CSR::CSR(const std::string filePath) {
 	}
 	fin.close();
 
-	std::cout << "lol";
-
 	//Parse into CSR
-	for(int currentRow = 1; currentRow <= N ; currentRow++ ){
+	for(int currentRow = 1; currentRow <= M ; currentRow++ ){
 		for(int i = 0 ; i < L ; i++){
 			if(row[i] == currentRow ){
 				(*this).as.push_back(entry[i]);
@@ -60,7 +58,7 @@ CSR::CSR(const std::string filePath) {
 	(*this).irp.push_back(0);
 	int oldValue(0);
 
-	for(int i = 1 ; i <= N ; i++){//The row we want the number of NN entry
+	for(int i = 1 ; i <= M ; i++){//The row containing the next NN entry
 		int nbValuePerRow = 0;
 		for(int j = 0 ; j < N ; j++ ){//iterating through the row array to find the number of NN entry
 			if(row[j] == i){
@@ -77,15 +75,18 @@ CSR::CSR(const std::string filePath) {
 	}
 	std::cout << std::endl;
 
+	for(int i = 0; i < (*this).irp.size(); i ++){
+			std::cout << (*this).irp[i] << " ";
+		}
+	std::cout << std::endl;
+
 	for(int i = 0; i < (*this).ja.size(); i ++){
 		std::cout << (*this).ja[i] << " ";
 	}
 	std::cout << std::endl;
 
-	for(int i = 0; i < (*this).irp.size(); i ++){
-		std::cout << (*this).irp[i] << " ";
-	}
-	std::cout << std::endl;
+
+
 }
 
 CSR::~CSR() {

@@ -29,6 +29,7 @@ CSR::CSR(const std::string filePath) {
 
 	(*this).M = M;
 	(*this).N = N;
+
 	column = new int[L];
 	row = new int[L];
 	entry = new double[L];
@@ -72,14 +73,15 @@ CSR::CSR(const std::string filePath) {
 }
 
 long CSR::serialVectorProduct(int* vector){
-	int t;
-	for(int i = 1; i < (*this).M; i++ ){
+	double t;
+	for(int i = 0; i < (*this).M; i++ ){
 		t = 0;
 		for(int j = (*this).irp[i]; j <= (*this).irp[i+1]-1;j++){
 			t += as[j]*vector[ja[j]];
 		}
 		std::cout << "i: " << t <<std::endl;
 	}
+	return 0;
 }
 
 std::ostream& operator<<(std::ostream& os, CSR& obj)
@@ -104,6 +106,7 @@ std::ostream& operator<<(std::ostream& os, CSR& obj)
 		os << obj.ja[i] << " ";
 	}
 	os << std::endl;
+	return os;
 }
 
 CSR::~CSR() {

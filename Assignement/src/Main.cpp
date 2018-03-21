@@ -12,15 +12,16 @@ using namespace std;
 int main(){
 
 	try{
-		CSR matrix1("../matricesFile/cage4.mtx");
+		CSR matrix1("../matricesFile/testWiki.mtx");
 		std::cout << matrix1;
 		int tab[50];
-		for(int i = 0 ; i < 50; i++){
-			tab[i] = 1;
+		tab[0] = 0;
+		for(int i = 1 ; i < 50; i++){
+			tab[i] = 2;
 		}
 
 		matrix1.serialVectorProduct(tab);
-	}catch(std::ifstream::failure e){
+	}catch(const std::ifstream::failure & e){
 		std::cout << "Error openning/reading/closing file";
 	}
 

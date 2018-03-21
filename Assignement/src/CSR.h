@@ -24,6 +24,8 @@ public:
 
 
 	CSR(std::string filePath);
+	long serialVectorProduct(int* vector);
+	friend std::ostream& operator<<(std::ostream& os, CSR& obj);
 	virtual ~CSR();
 };
 

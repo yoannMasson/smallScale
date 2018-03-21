@@ -69,27 +69,45 @@ CSR::CSR(const std::string filePath) {
 		oldValue += nbValuePerRow;
 	}
 
+}
 
-	for(int i = 0; i < (*this).as.size(); i ++){
-		std::cout << (*this).as[i] << " ";
-	}
-	std::cout << std::endl;
-
-	for(int i = 0; i < (*this).irp.size(); i ++){
-			std::cout << (*this).irp[i] << " ";
+long CSR::serialVectorProduct(int* vector){
+	int t;
+	for(int i = 1; i < (*this).M; i++ ){
+		t = 0;
+		for(int j = (*this).irp[i]; j <= (*this).irp[i+1]-1;j++){
+			t += as[j]*vector[ja[j]];
 		}
-	std::cout << std::endl;
-
-	for(int i = 0; i < (*this).ja.size(); i ++){
-		std::cout << (*this).ja[i] << " ";
+		std::cout << "i: " << t <<std::endl;
 	}
-	std::cout << std::endl;
+}
 
+std::ostream& operator<<(std::ostream& os, CSR& obj)
+{
+	os << "M: " << obj.M << std::endl;
+	os << "N: " << obj.N << std::endl;
 
+	os << "AS: " << std::endl;
+	for(int i = 0; i < obj.as.size(); i ++){
+		os << obj.as[i] << " ";
+	}
+	os << std::endl;
 
+	os << "IRP: " << std::endl;
+	for(int i = 0; i < obj.irp.size(); i ++){
+		os << obj.irp[i] << " ";
+	}
+	os << std::endl;
+
+	os << "JA: " << std::endl;
+	for(int i = 0; i < obj.ja.size(); i ++){
+		os << obj.ja[i] << " ";
+	}
+	os << std::endl;
 }
 
 CSR::~CSR() {
-	// TODO Auto-generated destructor stub
+
+
 }
 

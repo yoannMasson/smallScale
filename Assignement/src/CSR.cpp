@@ -10,6 +10,8 @@
 #include <fstream>
 #include <algorithm>
 #include <iostream>
+#include <ctime>
+#include <omp.h>
 
 CSR::CSR(const std::string filePath) {
 
@@ -51,7 +53,7 @@ CSR::CSR(const std::string filePath) {
 		for(int i = 0 ; i < L ; i++){
 			if(row[i] == currentRow ){
 				(*this).as.push_back(entry[i]);
-				(*this).ja.push_back(column[i]);
+				(*this).ja.push_back(column[i]-1);
 			}
 		}
 	}
@@ -72,18 +74,54 @@ CSR::CSR(const std::string filePath) {
 
 }
 
-long CSR::serialVectorProduct(int* vector){
+/**
+ * Compute the product
+ */
+double CSR::serialVectorProduct(double* vector, double* solution){
+	using namespace std;
+	clock_t begin = clock();
 	double t;
 	for(int i = 0; i < (*this).M; i++ ){
 		t = 0;
 		for(int j = (*this).irp[i]; j <= (*this).irp[i+1]-1;j++){
 			t += as[j]*vector[ja[j]];
 		}
-		std::cout << "i: " << t <<std::endl;
+		solution[i]=t;
 	}
-	return 0;
+	clock_t end = clock();
+	return  double(end - begin) / CLOCKS_PER_SEC;
 }
 
+
+/**
+ * Compute the vector product using OPEN MP
+ */
+double CSR::openMPVectorProduct(double* vector, double* solution){
+
+	double t;
+	int tid,i,j;
+	clock_t begin = clock();
+#pragma omp parallel num_threads(8) private(tid,i,j,t) shared(vector,solution)
+	{
+		tid = omp_get_thread_num();
+#pragma omp for schedule(static,2)
+		for(i = 0; i < (*this).M; i++ ){
+			t = 0;
+			for(j = (*this).irp[i]; j <= (*this).irp[i+1]-1;j++){
+				t += as[j]*vector[ja[j]];
+			}
+			solution[i]=t;
+		}
+	}
+	clock_t end = clock();
+	return  double(end - begin) / CLOCKS_PER_SEC;
+}
+
+
+
+/**
+ * Redefinition of the << operator.
+ */
 std::ostream& operator<<(std::ostream& os, CSR& obj)
 {
 	os << "M: " << obj.M << std::endl;
@@ -107,6 +145,14 @@ std::ostream& operator<<(std::ostream& os, CSR& obj)
 	}
 	os << std::endl;
 	return os;
+}
+
+int CSR::getM(){
+	return this->M;
+}
+
+int CSR::getN(){
+	return this->N;
 }
 
 CSR::~CSR() {

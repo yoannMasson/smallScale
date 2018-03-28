@@ -1,8 +1,8 @@
 all: Main.o CSR.o
-	g++ Main.o CSR.o -o exec
+	g++ Main.o -fopenmp CSR.o -o exec
 
 Main.o: Main.cpp
-	g++ -c Main.cpp
+	g++ -c -fopenmp Main.cpp
 
 CSR.o: CSR.cpp
-	g++ -c CSR.cpp 
+	g++ -c -fopenmp CSR.cpp 

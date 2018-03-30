@@ -18,8 +18,8 @@ private:
 	int M;
 	int N;
 	int MAXNZ;
-	std::vector<std::vector<double> > ja;
-	std::vector<std::vector<double> > as;
+	double* ja[];
+	double* as[];
 
 public:
 	Ellpack(const std::string filePath);

@@ -29,8 +29,12 @@ CSR::CSR(const std::string filePath) {
 	// Read defining parameters:
 	fin >> M >> N >> L;
 
-	(*this).M = M;
-	(*this).N = N;
+	this->M = M;
+	this->N = N;
+	this->L = L;
+	this->irp = new int[M+1];
+	this->as = new double[L];
+	this->ja = new int[L];
 
 	column = new int[L];
 	row = new int[L];
@@ -49,18 +53,20 @@ CSR::CSR(const std::string filePath) {
 	fin.close();
 
 	//Parse into CSR
+	int position = 0;
 	for(int currentRow = 1; currentRow <= M ; currentRow++ ){
 		for(int i = 0 ; i < L ; i++){
 			if(row[i] == currentRow ){
-				(*this).as.push_back(entry[i]);
-				(*this).ja.push_back(column[i]-1);
+				this->as[position] = entry[i];
+				this->ja[position] = column[i]-1;
+				position++;
 			}
 		}
 	}
 
-	(*this).irp.push_back(0);
+	this->irp[0] = 0;
 	int oldValue(0);
-
+	position = 1;
 	for(int i = 1 ; i <= M ; i++){//The row containing the next NN entry
 		int nbValuePerRow = 0;
 		for(int j = 0 ; j < N ; j++ ){//iterating through the row array to find the number of NN entry
@@ -68,7 +74,8 @@ CSR::CSR(const std::string filePath) {
 				nbValuePerRow++;
 			}
 		}
-		(*this).irp.push_back(oldValue+nbValuePerRow);
+		this->irp[position] = oldValue+nbValuePerRow;
+		position++;
 		oldValue += nbValuePerRow;
 	}
 
@@ -128,19 +135,19 @@ std::ostream& operator<<(std::ostream& os, CSR& obj)
 	os << "N: " << obj.N << std::endl;
 
 	os << "AS: " << std::endl;
-	for(int i = 0; i < obj.as.size(); i ++){
+	for(int i = 0; i < obj.L; i ++){
 		os << obj.as[i] << " ";
 	}
 	os << std::endl;
 
 	os << "IRP: " << std::endl;
-	for(int i = 0; i < obj.irp.size(); i ++){
+	for(int i = 0; i < obj.M+1; i ++){
 		os << obj.irp[i] << " ";
 	}
 	os << std::endl;
 
 	os << "JA: " << std::endl;
-	for(int i = 0; i < obj.ja.size(); i ++){
+	for(int i = 0; i < obj.L ; i ++){
 		os << obj.ja[i] << " ";
 	}
 	os << std::endl;

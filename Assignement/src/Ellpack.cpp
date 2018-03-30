@@ -36,8 +36,7 @@ Ellpack::Ellpack(const std::string filePath) {
 	entry = new double[L];
 
 	// Read the data
-	for (int l = 0; l < L; l++)
-	{
+	for (int l = 0; l < L; l++){
 		int m,n;
 		double data;
 		fin >> m >> n >> data;
@@ -61,7 +60,17 @@ Ellpack::Ellpack(const std::string filePath) {
 			this->MAXNZ = nbValuePerRow[i];
 		}
 	}
-	std::cout  << this->MAXNZ << std::endl;
+
+	//2D Array of coefficient
+	for(int currentRow = 1; currentRow <= M ; currentRow++ ){
+		for(int i = 0; i < L ; i++ ){
+			if(row[i] == currentRow){
+
+			}
+		}
+	}
+
+
 }
 
 

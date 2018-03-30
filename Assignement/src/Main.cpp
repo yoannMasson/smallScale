@@ -12,12 +12,11 @@ using namespace std;
 
 int main(){
 
-	std::string matrixPath = "../matricesFile/cavity10.mtx";
+	std::string matrixPath = "../matricesFile/testWiki.mtx";
 	//Compute CSR
-	/*try{
-		std::string matrixPath = "../matricesFile/thermomech_TK.mtx";
+	try{
 		CSR csr(matrixPath);
-
+		std::cout << csr;
 		int SIZE = csr.getM();
 		double vector[csr.getN()];
 		double solutionSerial[SIZE];
@@ -32,6 +31,7 @@ int main(){
 		timeSerial = csr.serialVectorProduct(vector,solutionOpenMP);
 
 		for(int i = 0; i < SIZE ; i++ ){
+			std::cout << solutionOpenMP[i] << " ";
 			if(solutionSerial[i] != solutionOpenMP[i]){
 				std::cout << "i:"<<i<< " is not the same openMP: " << solutionOpenMP[i] << ", serial: " << solutionSerial[i] << std::endl;
 			}
@@ -41,7 +41,7 @@ int main(){
 
 	}catch(const std::ifstream::failure & e){
 		std::cout << "Error openning/reading/closing file";
-	}*/
+	}
 
 	//Compute ELlpack
 	try{
@@ -68,7 +68,7 @@ int main(){
 		}
 		std::cout << "It took " << timeOpenMP <<" secondes to compute openMP-y"<< std::endl ;
 		std::cout << "It took " << timeSerial <<" secondes to compute with serial"<< std::endl ;
-*/
+		 */
 	}catch(const std::ifstream::failure & e){
 		std::cout << "Error openning/reading/closing file";
 	}

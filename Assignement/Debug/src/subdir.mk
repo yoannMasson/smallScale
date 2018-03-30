@@ -10,6 +10,7 @@ CPP_SRCS += \
 
 O_SRCS += \
 ../src/CSR.o \
+../src/Ellpack.o \
 ../src/Main.o 
 
 OBJS += \

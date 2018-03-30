@@ -10,4 +10,5 @@ CSR.o: CSR.cpp
 Ellpack.o: Ellpack.cpp
 	g++ -c -fopenmp Ellpack.cpp
 clean:
-	rm -rf *.o
+	rm -rf *.o 
+	rm exec 

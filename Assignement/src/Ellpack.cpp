@@ -63,17 +63,17 @@ Ellpack::Ellpack(const std::string filePath) {
 		}
 	}
 	//Initialization
-	this->ja = new int*[this->MAXNZ];
-	for(int i = 0; i < this->MAXNZ; ++i) {
-		this->ja[i] = new int[this->M];
-		for(int j = 0 ; j < this->M ; j++ ){
+	this->ja = new int*[this->M];
+	for(int i = 0; i < this->M; ++i) {
+		this->ja[i] = new int[this->MAXNZ];
+		for(int j = 0 ; j < this->MAXNZ ; j++ ){
 			this->ja[i][j] = -1;
 		}
 	}
-	this->as = new double*[this->MAXNZ];
-	for(int i = 0; i < this->MAXNZ; ++i) {
-			this->as[i] = new double[this->M];
-			for(int j = 0 ; j < this->M ; j++ ){
+	this->as = new double*[this->M];
+	for(int i = 0; i < this->M; ++i) {
+			this->as[i] = new double[this->MAXNZ];
+			for(int j = 0 ; j < this->MAXNZ ; j++ ){
 				this->as[i][j] = 0;
 			}
 		}
@@ -84,7 +84,7 @@ Ellpack::Ellpack(const std::string filePath) {
 		int positionX = 0;
 		for(int i = 0; i < L ; i++ ){
 			if(row[i] == currentRow){
-				this->as[positionX][currentRow-1] = entry[i];
+				this->as[currentRow-1][positionX] = entry[i];
 				positionX++;
 			}
 		}
@@ -95,7 +95,7 @@ Ellpack::Ellpack(const std::string filePath) {
 		int positionX = 0;
 		for(int i = 0; i < L ; i++ ){
 			if(row[i] == currentRow){
-				this->ja[positionX][currentRow-1] = column[i]-1;
+				this->ja[currentRow-1][positionX] = column[i]-1;
 				positionX++;
 			}
 		}
@@ -117,7 +117,7 @@ double Ellpack::serialVectorProduct(double* vector, double* solution){
 	for(int i = 0; i < this->M; i++){
 		t = 0;
 		for(int j = 0; j < this->MAXNZ ; j++){
-			t += this->as[j][i]*vector[ja[j][i]];
+			t += this->as[i][j]*vector[ja[i][j]];
 		}
 		solution[i] = t;
 	}

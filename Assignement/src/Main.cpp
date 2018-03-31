@@ -12,13 +12,13 @@ using namespace std;
 
 int main(){
 
-	std::string matrixPath = "../matricesFile/cage4.mtx";
+	std::string matrixPath = "../matricesFile/bcsstk17.mtx";
 
 	try{
 		//------------------------------------Initialization - Preprocessing
 		CSR csr(matrixPath);
 		Ellpack ep(matrixPath);
-		std::cout << csr <<std::endl;
+	//	std::cout << ep <<std::endl;
 		int SIZE = csr.getM();
 		double vector[csr.getN()];
 		double solutionSerialCSR[SIZE];
@@ -55,24 +55,24 @@ int main(){
 		}
 		std::cout << endl;
 
-		//---------------------------Print Result vectors
-		std::cout <<"CSR - Serial: "<< std::endl;
-		for(int i = 0; i < ep.getM(); i++ ){
-			std::cout << solutionSerialCSR[i] << " ";
-		}
-		std::cout << std::endl;
-
-		std::cout <<"CSR - OpenMP: "<< std::endl;
-		for(int i = 0; i < ep.getM(); i++ ){
-			std::cout << solutionOpenMPCSR[i] << " ";
-		}
-		std::cout << std::endl;
-
-		std::cout <<"ELlpack - Serial: "<< std::endl;
-		for(int i = 0; i < ep.getM(); i++ ){
-			std::cout << solutionSerialEllpack[i] << " ";
-		}
-		std::cout << std::endl;
+//		//---------------------------Print Result vectors
+//		std::cout <<"CSR - Serial: "<< std::endl;
+//		for(int i = 0; i < ep.getM(); i++ ){
+//			std::cout << solutionSerialCSR[i] << " ";
+//		}
+//		std::cout << std::endl;
+//
+//		std::cout <<"CSR - OpenMP: "<< std::endl;
+//		for(int i = 0; i < ep.getM(); i++ ){
+//			std::cout << solutionOpenMPCSR[i] << " ";
+//		}
+//		std::cout << std::endl;
+//
+//		std::cout <<"ELlpack - Serial: "<< std::endl;
+//		for(int i = 0; i < ep.getM(); i++ ){
+//			std::cout << solutionSerialEllpack[i] << " ";
+//		}
+//		std::cout << std::endl;
 
 //		for(int i = 0; i < ep.getM(); i++ ){
 //			std::cout << solutionOpenMPEllpack[i] << " ";

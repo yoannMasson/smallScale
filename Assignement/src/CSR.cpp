@@ -63,11 +63,7 @@ CSR::CSR(const std::string filePath) {
 			}
 		}
 	}
-	std::cout << "row";
-	for(int i = 0 ; i < L ; i++){
-		std::cout << row[i] << " ";
-	}
-	std::cout << std::endl;
+
 	this->irp[0] = 0;
 	int oldValue(0);
 	position = 1;

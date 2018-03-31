@@ -25,11 +25,11 @@ private:
 public:
 	Ellpack(const std::string filePath);
 	virtual ~Ellpack();
-//	double serialVectorProduct(double* vector, double* solution);
+	double serialVectorProduct(double* vector, double* solution);
 //	double openMPVectorProduct(double* vector, double* solution);
 	friend std::ostream& operator<<(std::ostream& os, Ellpack& obj);
-//	int getM();
-//	int getN();
+	int getM();
+	int getN();
 
 };
 

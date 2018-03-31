@@ -102,6 +102,30 @@ Ellpack::Ellpack(const std::string filePath) {
 	}
 }
 
+int Ellpack::getM(){
+	return this->M;
+}
+
+int Ellpack::getN(){
+	return this->N;
+}
+
+double Ellpack::serialVectorProduct(double* vector, double* solution){
+
+	double t;
+	clock_t begin = clock();
+	for(int i = 0; i < this->M; i++){
+		t = 0;
+		for(int j = 0; j < this->MAXNZ ; j++){
+			t += this->as[j][i]*vector[ja[j][i]];
+		}
+		solution[i] = t;
+	}
+	clock_t end = clock();
+	return  double(end - begin) / CLOCKS_PER_SEC;
+
+}
+
 /**
  * Redefinition of the << operator.
  */

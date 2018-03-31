@@ -63,13 +63,17 @@ CSR::CSR(const std::string filePath) {
 			}
 		}
 	}
-
+	std::cout << "row";
+	for(int i = 0 ; i < L ; i++){
+		std::cout << row[i] << " ";
+	}
+	std::cout << std::endl;
 	this->irp[0] = 0;
 	int oldValue(0);
 	position = 1;
 	for(int i = 1 ; i <= M ; i++){//The row containing the next NN entry
 		int nbValuePerRow = 0;
-		for(int j = 0 ; j < N ; j++ ){//iterating through the row array to find the number of NN entry
+		for(int j = 0 ; j < L ; j++ ){//iterating through the row array to find the number of NN entry
 			if(row[j] == i){
 				nbValuePerRow++;
 			}
@@ -85,7 +89,6 @@ CSR::CSR(const std::string filePath) {
  * Compute the product
  */
 double CSR::serialVectorProduct(double* vector, double* solution){
-	using namespace std;
 	clock_t begin = clock();
 	double t;
 	for(int i = 0; i < (*this).M; i++ ){

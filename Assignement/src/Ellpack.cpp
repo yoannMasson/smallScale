@@ -72,11 +72,11 @@ Ellpack::Ellpack(const std::string filePath) {
 	}
 	this->as = new double*[this->M];
 	for(int i = 0; i < this->M; ++i) {
-			this->as[i] = new double[this->MAXNZ];
-			for(int j = 0 ; j < this->MAXNZ ; j++ ){
-				this->as[i][j] = 0;
-			}
+		this->as[i] = new double[this->MAXNZ];
+		for(int j = 0 ; j < this->MAXNZ ; j++ ){
+			this->as[i][j] = 0;
 		}
+	}
 
 
 	//2D Array of coefficient
@@ -120,6 +120,27 @@ double Ellpack::serialVectorProduct(double* vector, double* solution){
 			t += this->as[i][j]*vector[ja[i][j]];
 		}
 		solution[i] = t;
+	}
+	clock_t end = clock();
+	return  double(end - begin) / CLOCKS_PER_SEC;
+
+}
+
+double Ellpack::openMPVectorProduct(double* vector, double* solution){
+
+	double t;
+	clock_t begin = clock();
+	int i,j;
+#pragma omp parallel num_threads(8) private(i,j,t) shared(vector,solution)
+	{
+#pragma omp for schedule(dynamic,this->M/8)
+		for(i = 0; i < this->M; i++){
+			t = 0;
+			for(j = 0; j < this->MAXNZ ; j++){
+				t += this->as[i][j]*vector[ja[i][j]];
+			}
+			solution[i] = t;
+		}
 	}
 	clock_t end = clock();
 	return  double(end - begin) / CLOCKS_PER_SEC;

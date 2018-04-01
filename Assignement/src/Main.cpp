@@ -12,7 +12,7 @@ using namespace std;
 
 int main(){
 
-	std::string matrixPath = "../matricesFile/bcsstk17.mtx";
+	std::string matrixPath = "../matricesFile/thermomech_TK.mtx";
 
 	try{
 		//------------------------------------Initialization - Preprocessing
@@ -41,15 +41,15 @@ int main(){
 		std::cout << endl;
 
 		//--------------------------Compute Ellpack
-		//timeOpenMP = ep.openMPVectorProduct(vector,solutionOpenMP);
+		timeOpenMPEllpack = ep.openMPVectorProduct(vector,solutionOpenMPEllpack);
 		timeSerialEllpack = ep.serialVectorProduct(vector,solutionSerialEllpack);
 		std::cout <<"Ellpack: "<< std::endl;
-		//std::cout << "It took " << timeOpenMP <<" secondes to compute openMP-y"<< std::endl ;
+		std::cout << "It took " << timeOpenMPEllpack <<" secondes to compute openMP-y"<< std::endl ;
 		std::cout << "It took " << timeSerialEllpack <<" secondes to compute with serial"<< std::endl ;
 
 		//--------------------------Compare Result
 		for(int i = 0; i < SIZE ; i++ ){
-			if(solutionSerialCSR[i] != solutionOpenMPCSR[i] || solutionSerialEllpack[i] != solutionSerialCSR[i]){
+			if(solutionSerialCSR[i] != solutionOpenMPCSR[i] || solutionSerialEllpack[i] != solutionSerialCSR[i] || solutionOpenMPEllpack[i] != solutionSerialEllpack[i]){
 				std::cout << "i:"<<i<< " is not the same for all solution" << std::endl;
 			}
 		}

@@ -27,9 +27,14 @@ public:
 	CSR(std::string filePath);
 	double serialVectorProduct(double* vector, double* solution);
 	double openMPVectorProduct(double* vector, double* solution);
+	double cudaVectorProduct(double* vector, double* solution);
 	friend std::ostream& operator<<(std::ostream& os, CSR& obj);
 	int getM();
 	int getN();
+	int getL();
+	int* getIRP();
+	int* getJA();
+	double* getAS();
 	virtual ~CSR();
 };
 

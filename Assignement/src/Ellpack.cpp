@@ -133,7 +133,7 @@ double Ellpack::openMPVectorProduct(double* vector, double* solution){
 	int i,j;
 #pragma omp parallel num_threads(8) private(i,j,t) shared(vector,solution)
 	{
-#pragma omp for schedule(dynamic,this->M/8)
+#pragma omp for schedule(dynamic,8)
 		for(i = 0; i < this->M; i++){
 			t = 0;
 			for(j = 0; j < this->MAXNZ ; j++){

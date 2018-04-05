@@ -5,8 +5,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/CSR.cpp \
-../src/Ellpack.cpp \
-../src/Main.cpp 
+../src/Ellpack.cpp 
 
 O_SRCS += \
 ../src/CSR.o \
@@ -15,13 +14,11 @@ O_SRCS += \
 
 OBJS += \
 ./src/CSR.o \
-./src/Ellpack.o \
-./src/Main.o 
+./src/Ellpack.o 
 
 CPP_DEPS += \
 ./src/CSR.d \
-./src/Ellpack.d \
-./src/Main.d 
+./src/Ellpack.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

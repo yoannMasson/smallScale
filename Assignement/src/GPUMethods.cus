@@ -1,0 +1,17 @@
+
+#ifndef GPU_METHODS
+#define GPU_METHODS
+
+#include <cuda.h>
+#include <cuda_runtime.h> 
+
+__global__ void gpuVectorProduct(double* as,int* ja,int* irp, int M, int L,double* vector, double* solution){
+
+}
+
+__global__ void callToGPUCSR(double* as,int* ja,int* irp, int M, int L,double* vector, double* solution){
+	
+}
+
+
+#endif

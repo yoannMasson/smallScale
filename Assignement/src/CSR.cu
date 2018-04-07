@@ -118,14 +118,14 @@ double CSR::serialVectorProduct(double* vector, double* solution){
 /**
  * Compute the vector product using OPEN MP
  */
-double CSR::openMPVectorProduct(double* vector, double* solution){
+double CSR::openMPVectorProduct(double* vector, double* solution,int nCore){
 
 	double t;
 	int i,j;
 	clock_t begin = clock();
-#pragma omp parallel num_threads(8) private(i,j,t) shared(vector,solution)
+#pragma omp parallel num_threads(nCore) private(i,j,t) shared(vector,solution)
 	{
-#pragma omp for schedule(static,2)
+#pragma omp for schedule(dynamic,32)
 		for(i = 0; i < (*this).M; i++ ){
 			t = 0;
 			for(j = (*this).irp[i]; j <= (*this).irp[i+1]-1;j++){

@@ -16,13 +16,13 @@ using namespace std;
 
 int main(){
 
-	std::string matrixPath = "../matricesFile/cage4.mtx";
+	string matrixPath = "../matricesFile/bcsstk17.mtx";
 
 	try{
 		//------------------------------------Initialization - Preprocessing
 		CSR csr(matrixPath);
 		Ellpack ep(matrixPath);
-		//	std::cout << ep <<std::endl;
+		cout << csr.getL() <<endl;
 		int SIZE = csr.getM();
 		double vector[csr.getN()];
 
@@ -35,74 +35,104 @@ int main(){
 		double solutionCudaEllpack[SIZE];
 
 		double timeOpenMPCSR, timeSerialCSR, timeOpenMPEllpack, timeSerialEllpack, timeCudaCSR, timeCudaEllpack;
-
+		
 		for(int i = 0 ; i < csr.getN(); i++){
 			vector[i] = i+1;
 		}
 
 		//-----------------------------------Compute CSR
-		timeOpenMPCSR = csr.openMPVectorProduct(vector,solutionSerialCSR);
-		timeSerialCSR = csr.serialVectorProduct(vector,solutionOpenMPCSR);
-		timeCudaCSR = csr.cudaVectorProduct(vector,solutionCudaCSR);
-		std::cout <<"CSR: "<< std::endl;
-		std::cout << "It took " << timeOpenMPCSR <<" secondes to compute openMP-y"<< std::endl ;
-		std::cout << "It took " << timeSerialCSR <<" secondes to compute with serial"<< std::endl ;
-		std::cout << "It took " << timeCudaCSR <<" secondes to compute with cuda"<< std::endl ;
-		std::cout << endl;
-
+		cout <<"CSR: "<< endl;
+		timeSerialCSR = 0;
+		for(int j=0;j<20;j++){//To get an average over 20 runs
+			timeSerialCSR += csr.serialVectorProduct(vector,solutionSerialCSR);
+		}
+		cout << "It took " << timeSerialCSR/20 <<" secondes to compute with serial, Mflops:" << ((2*csr.getL())/timeSerialCSR)/1000<< endl ;
+		
+		for(int i = 1 ; i <= 8 ; i++ ){
+			timeOpenMPCSR = 0;
+			for(int j=0;j<20;j++){//To get an average over 20 runs
+				timeOpenMPCSR += csr.openMPVectorProduct(vector,solutionOpenMPCSR,i);
+			}
+			cout << i << "cores: It took " << timeOpenMPCSR/20 <<" secondes to compute openMP-y, Mflops:" << ((2*csr.getL())/timeOpenMPCSR)/1000 << endl ;
+		}
+		
 		//--------------------------Compute Ellpack
-		timeOpenMPEllpack = ep.openMPVectorProduct(vector,solutionOpenMPEllpack);
-		timeSerialEllpack = ep.serialVectorProduct(vector,solutionSerialEllpack);
-		std::cout <<"Ellpack: "<< std::endl;
-		std::cout << "It took " << timeOpenMPEllpack <<" secondes to compute openMP-y"<< std::endl ;
-		std::cout << "It took " << timeSerialEllpack <<" secondes to compute with serial"<< std::endl ;
+		cout <<"Ellpack: "<< endl;
+		
+		timeSerialEllpack = 0;
+		for(int j=0;j<20;j++){//To get an average over 20 runs
+			timeSerialEllpack += ep.serialVectorProduct(vector,solutionSerialEllpack);
+		}
+		cout << "It took " << timeSerialEllpack/20 <<" secondes to compute with serial, Mflops:" << ((2*csr.getL())/timeSerialEllpack)/1000<< endl ;
+		
+		
+		for(int i = 1 ; i <= 8 ; i++ ){
+			timeOpenMPEllpack = 0;
+			for(int j=0;j<20;j++){//To get an average over 20 runs
+				timeOpenMPEllpack +=ep.openMPVectorProduct(vector,solutionOpenMPEllpack,i);
+			}
+			cout << i << "cores: It took " << timeOpenMPEllpack/20 <<" secondes to compute openMP-y, Mflops:" << ((2*csr.getL())/timeOpenMPEllpack)/1000 << endl ;
+		}
+		
+		
+		
+		//timeCudaCSR = csr.cudaVectorProduct(vector,solutionCudaCSR);
+		//cout << "It took " << timeCudaCSR <<" secondes to compute with cuda, Mflops:" << ((2*csr.getL())/timeCudaCSR)/1000 << endl ;
 
+		
+	
+		
+		//timeCudaEllpack = ep.cudaVectorProduct(vector,solutionCudaEllpack);
+		//cout << "It took " << timeCudaEllpack <<" secondes to compute with cuda, Mflops:" << ((2*csr.getL())/timeCudaEllpack)/1000 << endl ;
+		cout << endl;
 		//--------------------------Compare Result
 		for(int i = 0; i < SIZE ; i++ ){
-			std::cout << solutionCudaCSR[i] << std::endl;
-			if(solutionSerialCSR[i] - solutionOpenMPCSR[i] > 0.0001
-			|| solutionSerialEllpack[i] - solutionSerialCSR[i] > 0.0001
-			|| solutionOpenMPEllpack[i] - solutionSerialEllpack[i] > 0.0001
-			
+		//	cout << solutionCudaCSR[i] << endl;
+			if(abs(solutionSerialCSR[i] - solutionOpenMPCSR[i]) > 0.0001
+			|| abs(solutionSerialEllpack[i] - solutionSerialCSR[i]) > 0.0001
+			|| abs(solutionOpenMPEllpack[i] - solutionSerialEllpack[i]) > 0.0001
+			//|| abs(solutionCudaCSR[i] - solutionSerialCSR[i]) > 0.0001
+			//|| abs(solutionCudaEllpack[i] - solutionSerialEllpack[i]) > 0.0001
 			){
 
-				std::cout << solutionCudaCSR[i] << "gfgf " << solutionSerialCSR[i] << std::endl;
+				cout << i <<": "<< solutionCudaCSR[i] << " - " << solutionSerialCSR[i] << " - " << solutionCudaEllpack[i] << endl;
 				
 			}
 		}
-		std::cout << endl;
+		cout << endl;
 
-		//---------------------------Print Result vectors
-//		std::cout <<"CSR - Serial: "<< std::endl;
-//		for(int i = 0; i < ep.getM(); i++ ){
-//			std::cout << solutionSerialCSR[i] << " ";
-//		}
-//		std::cout << std::endl;
-//
-//		std::cout <<"CSR - OpenMP: "<< std::endl;
-//		for(int i = 0; i < ep.getM(); i++ ){
-//			std::cout << solutionOpenMPCSR[i] << " ";
-//		}
-//		std::cout << std::endl;
-//
-//		std::cout <<"CSR - Cuda: "<< std::endl;
-//		for(int i = 0; i < ep.getM(); i++ ){
-//			std::cout << solutionCudaCSR[i] << " ";
-//		}
-//		std::cout << std::endl;
-//		
-//		std::cout <<"ELlpack - Serial: "<< std::endl;
-//		for(int i = 0; i < ep.getM(); i++ ){
-//			std::cout << solutionSerialEllpack[i] << " ";
-//		}
-//		std::cout << std::endl;
-//		for(int i = 0; i < ep.getM(); i++ ){
-//			std::cout << solutionOpenMPEllpack[i] << " ";
-//		}
-//		std::cout << std::endl;
+	/*	//---------------------------Print Result vectors
+		cout <<"CSR: "<< endl;
+		for(int i = 0; i < ep.getM(); i++ ){
+			cout << solutionSerialCSR[i] << " ";
+		}
+		cout << endl;
+		for(int i = 0; i < ep.getM(); i++ ){
+			cout << solutionOpenMPCSR[i] << " ";
+		}
+		cout << endl;
 
-	}catch(const std::ifstream::failure & e){
-		std::cout << "Error openning/reading/closing file";
+		for(int i = 0; i < ep.getM(); i++ ){
+			cout << solutionCudaCSR[i] << " ";
+		}
+		cout << endl;
+		
+		cout <<"ELlpack: "<< endl;
+		for(int i = 0; i < ep.getM(); i++ ){
+			cout << solutionSerialEllpack[i] << " ";
+		}
+		cout << endl;
+		for(int i = 0; i < ep.getM(); i++ ){
+			cout << solutionOpenMPEllpack[i] << " ";
+		}
+		cout << endl;
+		for(int i = 0; i < ep.getM(); i++ ){
+			cout << solutionCudaEllpack[i] << " ";
+		}
+		cout << endl;*/
+
+	}catch(const ifstream::failure & e){
+		cout << "Error openning/reading/closing file";
 	}
 
 

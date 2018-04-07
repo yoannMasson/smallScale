@@ -12,6 +12,23 @@
 #include <iostream>
 #include <ctime>
 #include <omp.h>
+#include <cuda_runtime_api.h>
+#include <cuda.h>
+#include <cuda_runtime.h>  // For CUDA runtime API
+
+__global__ void gpuVectorProductEllpack(double** as, int** ja, int M, int maxnz, double* vector, double* solution){
+	int idx = threadIdx.x + blockIdx.x * blockDim.x;
+	if(idx < M){
+		double t = 0;
+		for(int j = 0; j < maxnz ; j++){
+			t += as[idx][j]*vector[ja[idx][j]];
+		}
+		solution[idx] = t;
+	}else{
+		solution[0] = M;
+	}
+}
+
 
 Ellpack::Ellpack(const std::string filePath) {
 	// Open the file:
@@ -126,14 +143,14 @@ double Ellpack::serialVectorProduct(double* vector, double* solution){
 
 }
 
-double Ellpack::openMPVectorProduct(double* vector, double* solution){
+double Ellpack::openMPVectorProduct(double* vector, double* solution,int nCore){
 
 	double t;
 	clock_t begin = clock();
 	int i,j;
-#pragma omp parallel num_threads(8) private(i,j,t) shared(vector,solution)
+#pragma omp parallel num_threads(nCore) private(i,j,t) shared(vector,solution)
 	{
-#pragma omp for schedule(dynamic,8)
+#pragma omp for schedule(dynamic,32)
 		for(i = 0; i < this->M; i++){
 			t = 0;
 			for(j = 0; j < this->MAXNZ ; j++){
@@ -146,6 +163,46 @@ double Ellpack::openMPVectorProduct(double* vector, double* solution){
 	return  double(end - begin) / CLOCKS_PER_SEC;
 
 }
+
+
+double Ellpack::cudaVectorProduct(double* vector, double* solution){
+	// Allocate global memory on the GPU.
+	double* d_vector = 0 ;
+	double* d_solution = 0;
+	int** d_ja = 0;
+	double** d_as = 0;
+	size_t pitchJA,pitchAS;
+
+	cudaMalloc((void**) &d_vector, this->getM() * sizeof(double));
+	cudaMalloc((void**) &d_solution, this->getM() * sizeof(double));
+	cudaMallocPitch((void**) &d_ja,&pitchJA, this->MAXNZ * sizeof(double),this->M);
+	cudaMallocPitch((void**) &d_as,&pitchAS, this->MAXNZ * sizeof(double),this->M);
+
+
+	// Copy vectors from the host (CPU) to the device (GPU).
+	cudaMemcpy(d_vector, vector, this->getM() * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy2D(d_ja, pitchJA*sizeof(double), this->ja, this->MAXNZ*sizeof(double), this->MAXNZ*sizeof(double), this->M, cudaMemcpyHostToDevice);
+	cudaMemcpy2D(d_as, pitchAS*sizeof(double), this->as, this->MAXNZ*sizeof(double), this->MAXNZ*sizeof(double), this->M, cudaMemcpyHostToDevice);
+
+	//Calling method and mesuring time
+	clock_t begin = clock();
+	gpuVectorProductEllpack<<<1,this->getM()>>>(d_as,d_ja,this->getM(),this->MAXNZ,d_vector,d_solution);
+	
+	cudaDeviceSynchronize();
+	clock_t end = clock();
+	//get back the result from the GPU
+	cudaMemcpy(solution, d_solution, this->getM() * sizeof(double), cudaMemcpyDeviceToHost);
+
+	//Clean Memory
+	cudaFree(d_vector);
+	cudaFree(d_ja);
+	cudaFree(d_as);
+	cudaFree(d_solution);
+
+	return  double(end - begin) / CLOCKS_PER_SEC;
+
+}
+
 
 /**
  * Redefinition of the << operator.

@@ -41,37 +41,39 @@ int main(){
 		}
 
 		//-----------------------------------Compute CSR
+		int nbRun = 100;
+		cout << "Average time over " << nbRun << " runs " <<endl;
 		cout <<"CSR: "<< endl;
 		timeSerialCSR = 0;
-		for(int j=0;j<20;j++){//To get an average over 20 runs
+		for(int j=0;j<nbRun;j++){//To get an average 
 			timeSerialCSR += csr.serialVectorProduct(vector,solutionSerialCSR);
 		}
-		cout << "It took " << timeSerialCSR/20 <<" secondes to compute with serial, Mflops:" << ((2*csr.getL())/timeSerialCSR)/1000<< endl ;
+		cout << "It took " << timeSerialCSR/nbRun <<" secondes to compute with serial, Mflops:" << ((2*csr.getL())/timeSerialCSR)/1000<< endl ;
 		
 		for(int i = 1 ; i <= 8 ; i++ ){
 			timeOpenMPCSR = 0;
-			for(int j=0;j<20;j++){//To get an average over 20 runs
+			for(int j=0;j<nbRun;j++){//To get an average
 				timeOpenMPCSR += csr.openMPVectorProduct(vector,solutionOpenMPCSR,i);
 			}
-			cout << i << "cores: It took " << timeOpenMPCSR/20 <<" secondes to compute openMP-y, Mflops:" << ((2*csr.getL())/timeOpenMPCSR)/1000 << endl ;
+			cout << i << "cores: It took " << timeOpenMPCSR/nbRun <<" secondes to compute openMP-y, Mflops:" << ((2*csr.getL())/timeOpenMPCSR)/1000 << endl ;
 		}
 		
 		//--------------------------Compute Ellpack
 		cout <<"Ellpack: "<< endl;
 		
 		timeSerialEllpack = 0;
-		for(int j=0;j<20;j++){//To get an average over 20 runs
+		for(int j=0;j<nbRun;j++){//To get an average 
 			timeSerialEllpack += ep.serialVectorProduct(vector,solutionSerialEllpack);
 		}
-		cout << "It took " << timeSerialEllpack/20 <<" secondes to compute with serial, Mflops:" << ((2*csr.getL())/timeSerialEllpack)/1000<< endl ;
+		cout << "It took " << timeSerialEllpack/nbRun <<" secondes to compute with serial, Mflops:" << ((2*csr.getL())/timeSerialEllpack)/1000<< endl ;
 		
 		
 		for(int i = 1 ; i <= 8 ; i++ ){
 			timeOpenMPEllpack = 0;
-			for(int j=0;j<20;j++){//To get an average over 20 runs
+			for(int j=0;j<nbRun;j++){//To get an average 
 				timeOpenMPEllpack +=ep.openMPVectorProduct(vector,solutionOpenMPEllpack,i);
 			}
-			cout << i << "cores: It took " << timeOpenMPEllpack/20 <<" secondes to compute openMP-y, Mflops:" << ((2*csr.getL())/timeOpenMPEllpack)/1000 << endl ;
+			cout << i << "cores: It took " << timeOpenMPEllpack/nbRun <<" secondes to compute openMP-y, Mflops:" << ((2*csr.getL())/timeOpenMPEllpack)/1000 << endl ;
 		}
 		
 		

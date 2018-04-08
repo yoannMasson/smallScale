@@ -39,7 +39,7 @@
 ## with your Cranfield email address on the #PBS -M line below:
 ## Your email address is NOT your username
 ##
-#PBS -m yoann 
+#PBS -m abe 
 #PBS -M yoann.Masson@cranfield.ac.uk
 ##
 ## ====================================

@@ -16,16 +16,14 @@
 #include <cuda.h>
 #include <cuda_runtime.h>  // For CUDA runtime API
 
-__global__ void gpuVectorProductEllpack(double** as, int** ja, int M, int maxnz, double* vector, double* solution){
+__global__ void gpuVectorProductEllpack(double* as, int* ja, int M, int maxnz, double* vector, double* solution){
 	int idx = threadIdx.x + blockIdx.x * blockDim.x;
 	if(idx < M){
 		double t = 0;
 		for(int j = 0; j < maxnz ; j++){
-			t += as[idx][j]*vector[ja[idx][j]];
+			t += as[idx*maxnz+j]*vector[ja[idx*maxnz+j]];
 		}
 		solution[idx] = t;
-	}else{
-		solution[0] = M;
 	}
 }
 
@@ -69,8 +67,8 @@ Ellpack::Ellpack(const std::string filePath) {
 
 	//Finding MAXNZ
 	this->MAXNZ=0;
-	int nbValuePerRow[M];
-	for(int i = 0 ; i <= M ; i++ ) nbValuePerRow[i] = 0;
+	int nbValuePerRow[M+1];
+	for(int i = 1 ; i <= M ; i++ ) nbValuePerRow[i] = 0;
 	for(int i = 0; i < L ; i++){
 		nbValuePerRow[row[i]] ++ ;
 	}
@@ -94,7 +92,6 @@ Ellpack::Ellpack(const std::string filePath) {
 			this->as[i][j] = 0;
 		}
 	}
-
 
 	//2D Array of coefficient
 	for(int currentRow = 1; currentRow <= M ; currentRow++ ){
@@ -169,25 +166,45 @@ double Ellpack::cudaVectorProduct(double* vector, double* solution){
 	// Allocate global memory on the GPU.
 	double* d_vector = 0 ;
 	double* d_solution = 0;
-	int** d_ja = 0;
-	double** d_as = 0;
-	size_t pitchJA,pitchAS;
+	int* d_ja = 0;
+	double* d_as = 0;
+	long long const SIZE = this->M*this->MAXNZ;
 
-	cudaMalloc((void**) &d_vector, this->getM() * sizeof(double));
+	int* h_ja = (int*)malloc(this->M * this->MAXNZ * sizeof(int));
+	double* h_as = (double*)malloc(this->M * this->MAXNZ * sizeof(double));
+
+
+	//Flattenning the matrices as & ja
+	for(int i = 0; i < this->M; i++ ){
+		for(int j = 0; j < this->MAXNZ ; j++ ){
+			h_as[i*this->MAXNZ+j] = this->as[i][j];
+		}
+	}
+
+	for(int i = 0; i < this->M; i++ ){
+		for(int j = 0; j < this->MAXNZ ; j++ ){
+			h_ja[i*this->MAXNZ+j] = this->ja[i][j];
+		}
+	}
+	cudaMalloc((void**) &d_vector, this->N * sizeof(double));
 	cudaMalloc((void**) &d_solution, this->getM() * sizeof(double));
-	cudaMallocPitch((void**) &d_ja,&pitchJA, this->MAXNZ * sizeof(double),this->M);
-	cudaMallocPitch((void**) &d_as,&pitchAS, this->MAXNZ * sizeof(double),this->M);
-
+	cudaMalloc((void**) &d_as, SIZE * sizeof(double));
+	cudaMalloc((void**) &d_ja, SIZE * sizeof(int));
 
 	// Copy vectors from the host (CPU) to the device (GPU).
-	cudaMemcpy(d_vector, vector, this->getM() * sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy2D(d_ja, pitchJA*sizeof(double), this->ja, this->MAXNZ*sizeof(double), this->MAXNZ*sizeof(double), this->M, cudaMemcpyHostToDevice);
-	cudaMemcpy2D(d_as, pitchAS*sizeof(double), this->as, this->MAXNZ*sizeof(double), this->MAXNZ*sizeof(double), this->M, cudaMemcpyHostToDevice);
+	cudaMemcpy(d_vector, vector, this->N * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_as, h_as, SIZE * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_ja, h_ja, SIZE * sizeof(int), cudaMemcpyHostToDevice);
 
 	//Calling method and mesuring time
 	clock_t begin = clock();
-	gpuVectorProductEllpack<<<1,this->getM()>>>(d_as,d_ja,this->getM(),this->MAXNZ,d_vector,d_solution);
-	
+	int nbBlock = 1;
+	int nbThread = this->getM();
+	if(nbThread >= 1024){
+		nbBlock = (this->getM()/1024)+1;
+		nbThread = 1024;
+	}
+	gpuVectorProductEllpack<<<nbBlock,nbThread>>>(d_as,d_ja,this->getM(),this->MAXNZ,d_vector,d_solution);
 	cudaDeviceSynchronize();
 	clock_t end = clock();
 	//get back the result from the GPU
@@ -215,8 +232,8 @@ std::ostream& operator<<(std::ostream& os, Ellpack& obj)
 	os << "MAXNZ: " << obj.MAXNZ << std::endl;
 
 	os << "JA: " << std::endl;
-	for(int i = 0; i < obj.MAXNZ; i ++){
-		for(int j = 0; j < obj.M ; j++ ){
+	for(int i = 0; i < obj.M; i ++){
+		for(int j = 0; j < obj.MAXNZ ; j++ ){
 			os << obj.ja[i][j] << " ";
 		}
 		os << std::endl;
@@ -224,8 +241,8 @@ std::ostream& operator<<(std::ostream& os, Ellpack& obj)
 	os << std::endl;
 
 	os << "AS: " << std::endl;
-	for(int i = 0; i < obj.MAXNZ; i ++){
-		for(int j = 0; j < obj.M ; j++ ){
+	for(int i = 0; i < obj.M; i ++){
+		for(int j = 0; j < obj.MAXNZ ; j++ ){
 			os << obj.as[i][j] << " ";
 		}
 		os << std::endl;
@@ -240,4 +257,3 @@ std::ostream& operator<<(std::ostream& os, Ellpack& obj)
 Ellpack::~Ellpack() {
 	// TODO Auto-generated destructor stub
 }
-

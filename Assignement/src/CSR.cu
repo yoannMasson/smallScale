@@ -178,22 +178,27 @@ double CSR::cudaVectorProduct(double* vector, double* solution){
 	double* d_as = 0;
 
 
-	cudaMalloc((void**) &d_vector, this->getM() * sizeof(double));
+	cudaMalloc((void**) &d_vector, this->getN() * sizeof(double));
 	cudaMalloc((void**) &d_solution, this->getM() * sizeof(double));
 	cudaMalloc((void**) &d_ja, this->getL() * sizeof(int));
 	cudaMalloc((void**) &d_as, this->getL() * sizeof(double));
 	cudaMalloc((void**) &d_irp, (this->getM()+1) * sizeof(int));
 
 	// Copy vectors from the host (CPU) to the device (GPU).
-	cudaMemcpy(d_vector, vector, this->getM() * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_vector, vector, this->getN() * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_ja, this->getJA(), this->getL() * sizeof(int), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_as, this->getAS(), this->getL() * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_irp, this->getIRP(), (this->getM()+1) * sizeof(int), cudaMemcpyHostToDevice);
 
 	//Calling method and mesuring time
 	clock_t begin = clock();
-
-	gpuVectorProduct<<<1,this->getM()>>>(d_as,d_ja,d_irp,this->getM(),this->getL(),d_vector,d_solution);
+	int nbBlock = 1;
+	int nbThread = this->getM();
+	if(nbThread >= 1024){
+		nbBlock = (this->getM()/1024)+1;
+		nbThread = 1024;
+	}
+	gpuVectorProduct<<<nbBlock,nbThread>>>(d_as,d_ja,d_irp,this->getM(),this->getL(),d_vector,d_solution);
 	cudaDeviceSynchronize();
 	clock_t end = clock();
 	//get back the result from the GPU
@@ -240,4 +245,3 @@ CSR::~CSR() {
 
 
 }
-

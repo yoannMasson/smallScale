@@ -101,7 +101,7 @@ CSR::CSR(const std::string filePath) {
  * Compute the product
  */
 double CSR::serialVectorProduct(double* vector, double* solution){
-	clock_t begin = clock();
+	double begin = omp_get_wtime();
 	double t;
 	for(int i = 0; i < (*this).M; i++ ){
 		t = 0;
@@ -110,7 +110,7 @@ double CSR::serialVectorProduct(double* vector, double* solution){
 		}
 		solution[i]=t;
 	}
-	clock_t end = clock();
+	double end = omp_get_wtime();
 	return  double(end - begin) ;
 }
 

@@ -127,7 +127,7 @@ int Ellpack::getN(){
 double Ellpack::serialVectorProduct(double* vector, double* solution){
 
 	double t;
-	clock_t begin = clock();
+	double begin = omp_get_wtime();
 	for(int i = 0; i < this->M; i++){
 		t = 0;
 		for(int j = 0; j < this->MAXNZ ; j++){
@@ -135,7 +135,7 @@ double Ellpack::serialVectorProduct(double* vector, double* solution){
 		}
 		solution[i] = t;
 	}
-	clock_t end = clock();
+	double end = omp_get_wtime();
 	return  double(end - begin) ;
 
 }

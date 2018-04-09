@@ -111,7 +111,7 @@ double CSR::serialVectorProduct(double* vector, double* solution){
 		solution[i]=t;
 	}
 	clock_t end = clock();
-	return  double(end - begin) / CLOCKS_PER_SEC;
+	return  double(end - begin) ;
 }
 
 
@@ -120,22 +120,23 @@ double CSR::serialVectorProduct(double* vector, double* solution){
  */
 double CSR::openMPVectorProduct(double* vector, double* solution,int nCore){
 
+	
+	double begin = omp_get_wtime();
+   #pragma omp parallel num_threads(nCore) shared(vector,solution)
+    {
 	double t;
-	int i,j;
-	clock_t begin = clock();
-#pragma omp parallel num_threads(nCore) private(i,j,t) shared(vector,solution)
-	{
-#pragma omp for schedule(dynamic,32)
-		for(i = 0; i < (*this).M; i++ ){
+	int chunk = this->M/omp_get_num_threads();
+#pragma omp for  schedule(static,chunk)
+		for(int i = 0; i < (*this).M; i++ ){
 			t = 0;
-			for(j = (*this).irp[i]; j <= (*this).irp[i+1]-1;j++){
+			for(int j = (*this).irp[i]; j <= (*this).irp[i+1]-1;j++){
 				t += as[j]*vector[ja[j]];
 			}
 			solution[i]=t;
 		}
 	}
-	clock_t end = clock();
-	return  double(end - begin) / CLOCKS_PER_SEC;
+	double end = omp_get_wtime();
+	return  double(end - begin) ;
 }
 
 
@@ -191,16 +192,16 @@ double CSR::cudaVectorProduct(double* vector, double* solution){
 	cudaMemcpy(d_irp, this->getIRP(), (this->getM()+1) * sizeof(int), cudaMemcpyHostToDevice);
 
 	//Calling method and mesuring time
-	clock_t begin = clock();
 	int nbBlock = 1;
 	int nbThread = this->getM();
 	if(nbThread >= 1024){
 		nbBlock = (this->getM()/1024)+1;
 		nbThread = 1024;
 	}
+	double begin = omp_get_wtime();
 	gpuVectorProduct<<<nbBlock,nbThread>>>(d_as,d_ja,d_irp,this->getM(),this->getL(),d_vector,d_solution);
 	cudaDeviceSynchronize();
-	clock_t end = clock();
+	double end = omp_get_wtime();
 	//get back the result from the GPU
 	cudaMemcpy(solution, d_solution, this->getM() * sizeof(double), cudaMemcpyDeviceToHost);
 
@@ -211,7 +212,7 @@ double CSR::cudaVectorProduct(double* vector, double* solution){
 	cudaFree(d_irp);
 	cudaFree(d_solution);
 
-	return  double(end - begin) / CLOCKS_PER_SEC;
+	return  double(end - begin) ;
 
 }
 

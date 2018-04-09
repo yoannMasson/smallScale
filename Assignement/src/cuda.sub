@@ -4,20 +4,20 @@
 ## -----------------------------------------
 ##
 ## Follow the 6 steps below to configure your job
-## 
+##
 ## STEP 1:
 ##
 ## Enter a job name after the -N on the line below:
 ##
-#PBS -N yoannMassonJob
+#PBS -N yoOpemMPCuda
 ##
 ## STEP 2:
 ##
 ## Select the number of cpus/cores and GPUs required by modifying the #PBS -l select line below
 ##
 ## The Maximum value for ncpus is 16 and mpiprocs MUST be the same value as ncpus.
-## The Maximum value for ngpus is 1 
-## e.g.	 4 CPUs and 1 GPU : select=1:ncpus=4:mpiprocs=4;ngpus=1
+## The Maximum value for ngpus is 1
+## e.g.  4 CPUs and 1 GPU : select=1:ncpus=4:mpiprocs=4;ngpus=1
 ##
 #PBS -l select=1:ncpus=16:mpiprocs=16:ngpus=1
 ##
@@ -27,7 +27,7 @@
 ## The default walltime in the gpu queue is one day(24 hours)
 ## The maximum walltime in the gpu queue is ten days(240 hours)
 ## In order to increase the walltime modify the #PBS -l walltime line below
-## and remove one of the leading # characters 
+## and remove one of the leading # characters
 ##
 #PBS -q gpu
 ##
@@ -39,7 +39,7 @@
 ## with your Cranfield email address on the #PBS -M line below:
 ## Your email address is NOT your username
 ##
-#PBS -m abe 
+#PBS -m abe
 #PBS -M yoann.Masson@cranfield.ac.uk
 ##
 ## ====================================
@@ -61,25 +61,28 @@ gpus=`echo $CUDA_VISIBLE_DEVICES|awk -F"," '{print NF}'`
 ## AND HERE
 ## ========
 ##
-## STEP 5: 
-## 
+## STEP 5:
+##
 ##  Load the default application environment
 ##  For a specific version add the version number, e.g.
 ##  module load CUDA/8.0.44
 ##
-module load CUDA
+module load CUDA/9.0.176
+module load intel
+module load foss/2016b CUDA CMake/3.6.1-foss-2016b
+export CC='which gcc'
+export CXX='which g++'
 ##
-## STEP 6: 
-## 
-## Run gpu application 
+## STEP 6:
+##
+## Run gpu application
 ##
 ## Put correct parameters and cuda application in the line below:
 ##
-exec
+./exec
 
 ## Tidy up the log directory
 ## DO NOT CHANGE THE LINE BELOW
 ## ============================
 rm $PBS_O_WORKDIR/$PBS_JOBID
 #
-

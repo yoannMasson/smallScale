@@ -17,8 +17,9 @@ using namespace std;
 int main(){
 
 	string matrixPath = "../matricesFile/thermomech_TK.mtx";
-
+	
 	try{
+		clock_t begin = clock();
 		//------------------------------------Initialization - Preprocessing
 		CSR csr(matrixPath);
 		Ellpack ep(matrixPath);
@@ -48,16 +49,16 @@ int main(){
 			timeSerialCSR += csr.serialVectorProduct(vector,solutionSerialCSR);
 		}
 		timeSerialCSR = timeSerialCSR/nbRun;
-		cout << "It took " << timeSerialCSR <<" secondes to compute with serial, Mflops:" << ((2*csr.getL())/timeSerialCSR)/1000<< endl ;
+		cout << "It took " << timeSerialCSR <<" secondes to compute with serial, Mflops:" << ((2*csr.getL())/timeSerialCSR)/1000000<< endl ;
 
-		for(int i = 1 ; i <= 8 ; i++ ){
+		for(int i = 1 ; i <= 16 ; i++ ){
 			timeOpenMPCSR = 0;
 			for(int j=0;j<nbRun;j++){//To get an average
 				timeOpenMPCSR += csr.openMPVectorProduct(vector,solutionOpenMPCSR,i);
 			}
 			timeOpenMPCSR = timeOpenMPCSR/nbRun;
-			cout << i << "cores: It took " << timeOpenMPCSR <<" secondes to compute openMP-y, Mflops:" << ((2*csr.getL())/timeOpenMPCSR)/1000 << endl ;
-
+			cout << i << "cores: It took " << timeOpenMPCSR <<" secondes to compute openMP-y, Mflops:" << ((2*csr.getL())/timeOpenMPCSR)/1000000 << endl ;
+			
 		}
 
 
@@ -65,7 +66,7 @@ int main(){
 			timeCudaCSR += csr.cudaVectorProduct(vector,solutionCudaCSR);
 		}
 		timeCudaCSR = timeCudaCSR/nbRun;
-		cout << "It took " << timeCudaCSR <<" secondes to compute with cuda, Mflops:" << ((2*csr.getL())/timeCudaCSR)/1000 << endl ;
+		cout << "It took " << timeCudaCSR <<" secondes to compute with cuda, Mflops:" << ((2*csr.getL())/timeCudaCSR)/1000000 << endl ;
 
 		//--------------------------Compute Ellpack
 		cout <<"Ellpack: "<< endl;
@@ -74,15 +75,17 @@ int main(){
 		for(int j=0;j<nbRun;j++){//To get an average
 			timeSerialEllpack += ep.serialVectorProduct(vector,solutionSerialEllpack);
 		}
-		cout << "It took " << timeSerialEllpack/nbRun <<" secondes to compute with serial, Mflops:" << ((2*csr.getL())/timeSerialEllpack)/1000<< endl ;
+		timeSerialEllpack = timeSerialEllpack/nbRun;
+		cout << "It took " << timeSerialEllpack <<" secondes to compute with serial, Mflops:" << ((2*csr.getL())/timeSerialEllpack)/1000000<< endl ;
 
 
-		for(int i = 1 ; i <= 8 ; i++ ){
+		for(int i = 1 ; i <= 16 ; i++ ){
 			timeOpenMPEllpack = 0;
 			for(int j=0;j<nbRun;j++){//To get an average
 				timeOpenMPEllpack +=ep.openMPVectorProduct(vector,solutionOpenMPEllpack,i);
 			}
-			cout << i << "cores: It took " << timeOpenMPEllpack/nbRun <<" secondes to compute openMP-y, Mflops:" << ((2*csr.getL())/timeOpenMPEllpack)/1000 << endl ;
+			timeOpenMPEllpack = timeOpenMPEllpack/nbRun;
+			cout << i << "cores: It took " << timeOpenMPEllpack <<" secondes to compute openMP-y, Mflops:" << ((2*csr.getL())/timeOpenMPEllpack)/1000000 << endl ;
 		}
 
 		timeCudaEllpack = 0;
@@ -91,7 +94,7 @@ int main(){
 		}
 
 		timeCudaEllpack = timeCudaEllpack/nbRun;
-		cout << "It took " << timeCudaEllpack <<" secondes to compute with cuda, Mflops:" << ((2*csr.getL())/timeCudaEllpack)/1000 << endl ;
+		cout << "It took " << timeCudaEllpack <<" secondes to compute with cuda, Mflops:" << ((2*csr.getL())/timeCudaEllpack)/1000000<< endl ;
 
 
 		//--------------------------Compare Result
@@ -143,7 +146,8 @@ int main(){
 		// 	cout << solutionCudaEllpack[i] << " ";
 		// }
 		// cout << endl;
-
+	clock_t end = clock();
+	cout << "Overall programm took " << (end-begin)/CLOCKS_PER_SEC << "secondes" << endl;
 	}catch(const ifstream::failure & e){
 		cout << "Error openning/reading/closing file";
 	}

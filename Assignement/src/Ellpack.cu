@@ -136,28 +136,29 @@ double Ellpack::serialVectorProduct(double* vector, double* solution){
 		solution[i] = t;
 	}
 	clock_t end = clock();
-	return  double(end - begin) / CLOCKS_PER_SEC;
+	return  double(end - begin) ;
 
 }
 
 double Ellpack::openMPVectorProduct(double* vector, double* solution,int nCore){
 
-	double t;
-	clock_t begin = clock();
-	int i,j;
-#pragma omp parallel num_threads(nCore) private(i,j,t) shared(vector,solution)
+	
+	double begin = omp_get_wtime();
+#pragma omp parallel num_threads(nCore) shared(vector,solution)
 	{
-#pragma omp for schedule(dynamic,32)
-		for(i = 0; i < this->M; i++){
+	double t;
+	int chunk = this->M/omp_get_num_threads();
+#pragma omp for schedule(static,chunk)
+		for(int i = 0; i < this->M; i++){
 			t = 0;
-			for(j = 0; j < this->MAXNZ ; j++){
+			for(int j = 0; j < this->MAXNZ ; j++){
 				t += this->as[i][j]*vector[ja[i][j]];
 			}
 			solution[i] = t;
 		}
 	}
-	clock_t end = clock();
-	return  double(end - begin) / CLOCKS_PER_SEC;
+	double end = omp_get_wtime();
+	return  double(end - begin) ;
 
 }
 
@@ -197,16 +198,16 @@ double Ellpack::cudaVectorProduct(double* vector, double* solution){
 	cudaMemcpy(d_ja, h_ja, SIZE * sizeof(int), cudaMemcpyHostToDevice);
 
 	//Calling method and mesuring time
-	clock_t begin = clock();
 	int nbBlock = 1;
 	int nbThread = this->getM();
 	if(nbThread >= 1024){
 		nbBlock = (this->getM()/1024)+1;
 		nbThread = 1024;
 	}
+	double begin = omp_get_wtime();
 	gpuVectorProductEllpack<<<nbBlock,nbThread>>>(d_as,d_ja,this->getM(),this->MAXNZ,d_vector,d_solution);
 	cudaDeviceSynchronize();
-	clock_t end = clock();
+	double end = omp_get_wtime();
 	//get back the result from the GPU
 	cudaMemcpy(solution, d_solution, this->getM() * sizeof(double), cudaMemcpyDeviceToHost);
 
@@ -216,7 +217,7 @@ double Ellpack::cudaVectorProduct(double* vector, double* solution){
 	cudaFree(d_as);
 	cudaFree(d_solution);
 
-	return  double(end - begin) / CLOCKS_PER_SEC;
+	return  double(end - begin) ;
 
 }
 
